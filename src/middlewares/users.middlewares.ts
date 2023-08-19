@@ -7,7 +7,8 @@ import { hashPassword } from '../utils/hashPassword'
 import { VerifyToken } from '~/utils/jwt'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
 import httpStatus from '~/constants/httpStatus'
-
+import { JsonWebTokenError } from 'jsonwebtoken'
+import { Request } from 'express'
 export const loginValidator = validate(
   checkSchema(
     {
@@ -178,20 +179,56 @@ export const accessTokenValidator = validate(
         },
         custom: {
           options: async (value: string, { req }) => {
-            const access_token = value.split('')[1]
-            console.log(req)
-            console.log(value)
-            console.log(access_token)
+            const access_token = value.split(' ')[1]
             if (!access_token) {
               throw new ErrorWithStatus({ message: MESSAGE.ACCESS_TOKEN_IS_REQUIRED, status: httpStatus.UNAUTHORIZED })
             }
             const decoded_authorization = await VerifyToken({ token: access_token })
-            req.decoded_authorization = decoded_authorization
+            ;(req as Request).decoded_authorization = decoded_authorization
             return true
           }
         }
       }
     },
     ['headers']
+  )
+)
+
+export const refreshTokenValidator = validate(
+  checkSchema(
+    {
+      refresh_token: {
+        notEmpty: {
+          errorMessage: MESSAGE.REFRESH_TOKEN_IS_REQUIRED
+        },
+        custom: {
+          options: async (value: string, { req }) => {
+            try {
+              const [decoded_refresh_token, refresh_token] = await Promise.all([
+                VerifyToken({ token: value }),
+                databaseService.refreshTokens.findOne({ token: value })
+              ])
+              if (refresh_token === null) {
+                throw new ErrorWithStatus({
+                  message: MESSAGE.REFRESH_TOKEN_IS_NOT_FOUND,
+                  status: httpStatus.UNAUTHORIZED
+                })
+              }
+              req.decoded_refresh_token = decoded_refresh_token
+            } catch (err) {
+              if (err instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: MESSAGE.REFRESH_TOKEN_IS_INVALID,
+                  status: httpStatus.UNAUTHORIZED
+                })
+              }
+              throw err
+            }
+            return true
+          }
+        }
+      }
+    },
+    ['body']
   )
 )

@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { decode } from 'punycode'
+import { TokenPayload } from '../models/requests/User.request'
 dotenv.config()
 export const signToken = ({
   payload,
@@ -30,13 +31,12 @@ export const VerifyToken = ({
   token: string
   privateKey?: string
 }) => {
-  return new Promise<jwt.JwtPayload>((resolve, reject) => {
+  return new Promise<TokenPayload>((resolve, reject) => {
     jwt.verify(token, privateKey, (err, decoded) => {
       if (err) {
-        console.log(err)
         reject(err)
       }
-      resolve(decoded as jwt.JwtPayload)
+      resolve(decoded as TokenPayload)
     })
   })
 }

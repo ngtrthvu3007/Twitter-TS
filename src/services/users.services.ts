@@ -7,6 +7,7 @@ import { TokenType } from '~/constants/UserVerify.enum'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { ObjectId } from 'mongodb'
 import dotenv from 'dotenv'
+import { MESSAGE } from '../constants/messages'
 dotenv.config()
 
 class UsersService {
@@ -46,6 +47,12 @@ class UsersService {
     return {
       access_token,
       refresh_token
+    }
+  }
+  async logout(refresh_token: string) {
+    await databaseService.refreshTokens.deleteOne({ token: refresh_token })
+    return {
+      message: MESSAGE.LOGOUT_SUCCESS
     }
   }
   async register(payload: RegisterReqBody) {

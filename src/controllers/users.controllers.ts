@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { RegisterReqBody } from '~/models/requests/User.request'
+import { RegisterReqBody, LogutReqBody } from '~/models/requests/User.request'
 import { ParamsDictionary } from 'express-serve-static-core'
 import usersSevice from '../services/users.services'
 import { ObjectId } from 'mongodb'
@@ -26,4 +26,10 @@ export const registerController = async (
     message: MESSAGE.REGISTER_SUCCESS,
     result
   })
+}
+
+export const logoutController = async (req: Request<ParamsDictionary, any, LogutReqBody>, res: Response) => {
+  const { refresh_token } = req.body
+  const result = await usersSevice.logout(refresh_token)
+  return res.json(result)
 }
