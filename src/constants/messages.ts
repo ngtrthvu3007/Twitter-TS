@@ -24,5 +24,15 @@ export const MESSAGE = {
   REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',
   REFRESH_TOKEN_IS_INVALID: 'Refresh token is invalid',
   REFRESH_TOKEN_IS_NOT_FOUND: 'Refresh token is not found',
-  LOGOUT_SUCCESS: 'Logout success'
+  LOGOUT_SUCCESS: 'Logout success',
+  EMAIL_VERIFY_TOKEN_IS_REQUIRED: 'Email verify token is required',
+  EMail_HAD_VERIFIED: 'Email is verified before',
+  EMail_VERIFY_SUCCESS: 'Email verify success',
+  RESEND_EMail_SUCCESS: 'Resend email success',
+  RESET_PASSWORD_EMAIL_HAVE_SENT: 'A reset password email is sent to your email',
+  FORGOT_PASSWORK_TOKEN_IS_REQUIRED: 'Forgot password token is required',
+  VERIFY_FORGOT_PASSWORD_SUCCESS: 'Verify forgot password success',
+  FORGOT_PASSWORD_IS_NOT_MATCH: 'Forgot password token is not match',
+  RESET_PASSWORD_SUCCESS: 'Reset password success',
+  GET_PROFILE_USER_SUCCESS: 'Get profile of user success'
 }
