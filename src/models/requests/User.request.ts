@@ -28,3 +28,22 @@ export interface VerifyEmailReqBody {
 export interface ForgotPasswordReqBody {
   email: string
 }
+export interface UpdateProfileReqBody {
+  nam?: string
+  date_of_birth?: Date
+  bio?: string // optional
+  location?: string // optional
+  website?: string // optional
+  username?: string // optional
+  avatar?: string // optional
+  cover_photo?: string // optional
+}
+
+export interface GetUserProfileReqBody {
+  username: string
+}
+
+export interface FollowUserReqBody {
+  user_id: string
+  followed_user_id: string
+}

@@ -8,9 +8,12 @@ import { VerifyToken } from '~/utils/jwt'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
 import httpStatus from '~/constants/httpStatus'
 import { JsonWebTokenError } from 'jsonwebtoken'
-import { Request } from 'express'
+import { Request, NextFunction, Response } from 'express'
 import { capitalize } from 'lodash'
 import { ObjectId } from 'mongodb'
+import { TokenPayload } from '../models/requests/User.request'
+import { UserVerifyStatus } from '../constants/UserVerify.enum'
+import { username_regex } from '~/constants/regex'
 
 const passwordSchema: ParamSchema = {
   notEmpty: {
@@ -457,6 +460,140 @@ export const resetPasswordValidator = validate(
               throw err
             }
             return true
+          }
+        }
+      }
+    },
+    ['body']
+  )
+)
+
+export const verifiedUserValidator = async (req: Request, res: Response, next: NextFunction) => {
+  const { verify } = req.decoded_authorization as TokenPayload
+  if (verify !== UserVerifyStatus.Verified) {
+    return next(
+      new ErrorWithStatus({
+        message: MESSAGE.USER_IS_NOT_VERIFIED,
+        status: httpStatus.FORBIDDEN
+      })
+    )
+  }
+  next()
+}
+
+export const updateProfileValidator = validate(
+  checkSchema(
+    {
+      name: {
+        optional: true,
+        isString: {
+          errorMessage: MESSAGE.NAME_MUST_BE_A_STRING
+        },
+        isLength: {
+          options: {
+            min: 1,
+            max: 100
+          },
+          errorMessage: MESSAGE.NAME_LENGTH_MUST_BE_FROM_1_TO_100
+        },
+        trim: true
+      },
+      date_of_birth: {
+        optional: true,
+        isISO8601: {
+          options: {
+            strict: true,
+            strictSeparator: true
+          }
+        }
+      },
+      bio: {
+        optional: true,
+        isString: {
+          errorMessage: MESSAGE.BIO_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 300
+          },
+          errorMessage: MESSAGE.BIO_LENGTH_MUST_BE_FROM_1_TO_300
+        }
+      },
+      location: {
+        optional: true,
+        isString: {
+          errorMessage: MESSAGE.BIO_MUST_BE_STRING
+        },
+        trim: true
+      },
+      website: {
+        optional: true,
+        isString: {
+          errorMessage: MESSAGE.WEBSITE_MUST_BE_STRING
+        },
+        trim: true
+      },
+      username: {
+        optional: true,
+        isString: {
+          errorMessage: MESSAGE.USER_NAME_MUST_BE_STRING
+        },
+        trim: true,
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!username_regex.test(value)) {
+              throw Error(MESSAGE.USERNAME_IS_INVALID)
+            }
+            const user = await databaseService.users.findOne({ username: value })
+            if (user) {
+              throw Error(MESSAGE.USERNAME_IS_EXIST)
+            }
+          }
+        }
+      },
+      avatar: {
+        optional: true,
+        isString: {
+          errorMessage: MESSAGE.AVATAR_MUST_BE_STRING
+        },
+        trim: true
+      },
+      cover_photo: {
+        optional: true,
+        isString: {
+          errorMessage: MESSAGE.PHOTO_MUST_BE_STRING
+        },
+        trim: true
+      }
+    },
+    ['body']
+  )
+)
+
+export const followUserValidator = validate(
+  checkSchema(
+    {
+      followed_user_id: {
+        notEmpty: {
+          errorMessage: MESSAGE.FOLLOW_USER_ID_IS_REQUIRED
+        },
+        custom: {
+          options: async (value: string, { req }) => {
+            const followed_user = await databaseService.users.findOne({ _id: new ObjectId(value) })
+            if (!ObjectId.isValid(value)) {
+              throw new ErrorWithStatus({
+                message: MESSAGE.FOLLOW_USER_ID_IS_INVALID,
+                status: httpStatus.NOT_FOUND
+              })
+            }
+            if (!followed_user) {
+              throw new ErrorWithStatus({
+                message: MESSAGE.USER_IS_NOT_FOUND,
+                status: httpStatus.NOT_FOUND
+              })
+            }
           }
         }
       }
