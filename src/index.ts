@@ -1,15 +1,22 @@
-import router from '~/routes/users.routes'
-import databaseService from '~/services/db.services'
 import express from 'express'
+import users_router from '~/routes/users.routes'
+import medias_router from '~/routes/medias.routes'
+import uploads_router from './routes/uploads.routes'
+import databaseService from '~/services/db.services'
 import { defaultErrorHandler } from './middlewares/error.middlewares'
-var morgan = require('morgan')
+import morgan from 'morgan'
+import dotenv from 'dotenv'
+
+dotenv.config()
 const app = express()
-const port = 3000
-app.use(morgan('tiny'))
+const port = process.env.PORT || 5050
 databaseService.connect()
+app.use(morgan('tiny'))
 app.use(express.json())
-app.use('/users', router)
+app.use('/uploads', uploads_router)
+app.use('/users', users_router)
+app.use('/medias', medias_router)
 app.use(defaultErrorHandler)
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Server is ready on port ${port}`)
 })

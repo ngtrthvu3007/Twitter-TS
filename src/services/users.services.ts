@@ -11,7 +11,6 @@ import { MESSAGE } from '../constants/messages'
 import { omit } from 'lodash'
 import { ErrorWithStatus } from '../models/schemas/Errors'
 import httpStatus from '~/constants/httpStatus'
-import Follower from '../models/schemas/Follower.schema'
 
 dotenv.config()
 
@@ -142,6 +141,12 @@ class UsersService {
       user_id,
       verify: UserVerifyStatus.Verified
     })
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({
+        user_id: new ObjectId(user_id),
+        token: refresh_token
+      })
+    )
     return {
       access_token,
       refresh_token
