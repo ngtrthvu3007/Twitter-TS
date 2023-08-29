@@ -6,6 +6,7 @@ import databaseService from '~/services/db.services'
 import { defaultErrorHandler } from './middlewares/error.middlewares'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
+import path from 'path'
 
 dotenv.config()
 const app = express()
@@ -14,6 +15,7 @@ databaseService.connect()
 app.use(morgan('tiny'))
 app.use(express.json())
 app.use('/uploads', uploads_router)
+app.use('/stream', express.static(path.resolve('uploads/temp')))
 app.use('/users', users_router)
 app.use('/medias', medias_router)
 app.use(defaultErrorHandler)

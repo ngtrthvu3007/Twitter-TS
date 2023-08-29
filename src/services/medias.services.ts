@@ -1,6 +1,6 @@
 import { Request } from 'express'
 import sharp from 'sharp'
-import { handleUploadImage } from '~/utils/file'
+import { handleUploadImage, handleUploadVideo } from '~/utils/file'
 import fs from 'fs'
 import { isProduction } from '../constants/env.config'
 import dotenv from 'dotenv'
@@ -9,7 +9,7 @@ import { Media } from '~/models/Media'
 dotenv.config()
 
 class MediasService {
-  async handleUploadImage(req: Request) {
+  async uploadImage(req: Request) {
     const files = await handleUploadImage(req)
     const result: Media[] = await Promise.all(
       files.map(async (file) => {
@@ -25,6 +25,17 @@ class MediasService {
       })
     )
     return result
+  }
+
+  async uploadVideo(req: Request) {
+    const files = await handleUploadVideo(req)
+    const { newFilename } = files[0]
+    return {
+      url: isProduction
+        ? `${process.env.HOST}/stream/${newFilename}`
+        : `http://localhost:${process.env.PORT}/stream/${newFilename}`,
+      type: MediaType.Video
+    }
   }
 }
 

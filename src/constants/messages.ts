@@ -53,5 +53,6 @@ export const MESSAGE = {
   NOT_FOLLOW_YET: 'False: You did`nt followed this user',
   USER_IS_NOT_ACTIVE: 'User is not active',
   USERNAME_IS_INVALID: 'Username must be 4-15 characters and contain only letter, number and underscrores',
-  USERNAME_IS_EXIST: 'Username is existing'
+  USERNAME_IS_EXIST: 'Username is existing',
+  REQUEST_SUCCESS: 'Request success'
 }

@@ -12,7 +12,8 @@ import {
   updateMyProfileController,
   getUserProfileController,
   followUserController,
-  unfollowUserController
+  unfollowUserController,
+  refreshTokenController
 } from '~/controllers/users.controllers'
 import { wrapAsync } from '~/utils/handlers'
 import {
@@ -34,6 +35,7 @@ const userRouter = Router()
 userRouter.post('/login', loginValidator, wrapAsync(loginController))
 userRouter.post('/register', registerValidator, wrapAsync(registerController))
 userRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
+userRouter.post('/refresh_token', refreshTokenValidator, wrapAsync(refreshTokenController))
 userRouter.post('/verify_email', emailVerifyTokenValidator, wrapAsync(verifyEmailController))
 userRouter.post('/resend_email', accessTokenValidator, wrapAsync(resendEmailController))
 userRouter.post('/forgot_password', emailValidator, wrapAsync(forgotPasswordController))

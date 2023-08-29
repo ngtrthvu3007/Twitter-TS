@@ -11,6 +11,7 @@ import { MESSAGE } from '../constants/messages'
 import { omit } from 'lodash'
 import { ErrorWithStatus } from '../models/schemas/Errors'
 import httpStatus from '~/constants/httpStatus'
+import { body } from 'express-validator'
 
 dotenv.config()
 
@@ -95,6 +96,31 @@ class UsersService {
       message: MESSAGE.LOGOUT_SUCCESS
     }
   }
+  async refreshToken({
+    user_id,
+    verify,
+    refresh_token
+  }: {
+    user_id: string
+    verify: UserVerifyStatus
+    refresh_token: string
+  }) {
+    const [access_token, new_refresh_token] = await Promise.all([
+      this.signAccessAndRefresToken({ user_id, verify }),
+      databaseService.refreshTokens.deleteOne({ token: refresh_token })
+    ])
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({
+        user_id: new ObjectId(user_id),
+        token: refresh_token
+      })
+    )
+    return {
+      access_token,
+      refresh_token
+    }
+  }
+
   async register(payload: RegisterReqBody) {
     const user_id = new ObjectId()
     const email_verify_token = await this.signEmailVerifyToken({
@@ -176,8 +202,6 @@ class UsersService {
 
   async forgotPassword({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     const forgot_password_token = await this.signForgotPasswordToken({ user_id, verify })
-
-    console.log('service: ', forgot_password_token)
     await databaseService.users.updateOne({ _id: new ObjectId(user_id) }, [
       {
         $set: {

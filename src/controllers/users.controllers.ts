@@ -7,7 +7,8 @@ import {
   ForgotPasswordReqBody,
   UpdateProfileReqBody,
   GetUserProfileReqBody,
-  FollowUserReqBody
+  FollowUserReqBody,
+  RefreshTokenReqBody
 } from '~/models/requests/User.request'
 import { ParamsDictionary } from 'express-serve-static-core'
 import usersSevice from '../services/users.services'
@@ -46,6 +47,19 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   const { refresh_token } = req.body
   const result = await usersSevice.logout(refresh_token)
   return res.json(result)
+}
+
+export const refreshTokenController = async (
+  req: Request<ParamsDictionary, any, RefreshTokenReqBody>,
+  res: Response
+) => {
+  const { refresh_token } = req.body
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
+  const result = await usersSevice.refreshToken({ user_id, verify, refresh_token })
+  return res.json({
+    message: MESSAGE.REQUEST_SUCCESS,
+    result
+  })
 }
 
 export const verifyEmailController = async (
